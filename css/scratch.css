@@ -1,0 +1,86 @@
+p{
+    font-weight: bold;
+    font-size: 20px
+}
+
+#top{
+    text-decoration: underline;
+}
+
+body{
+    background-color: whitesmoke;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+    border: 5px solid black;
+    margin: 20px 
+}
+
+.centered-list{
+    text-align: left;
+    padding-left: 0;
+    list-style-position: inside;
+    
+}
+
+.selectlist{
+    text-align: center;
+    font-size: 15px;
+    color: black;
+    padding-left: 5;
+    padding-right: 5;
+
+}
+
+.tableauPlaceholder {
+     max-width: 1000px;
+     margin: 0 auto;
+     border: 2px solid black;
+     padding: 20px;
+     border-radius: 8px;
+}
+      
+.box {
+    border: 2px solid black;
+    padding: 20px;
+    margin: 30px auto;         /* auto left/right centers it */
+    width: fit-content;        /* makes the box wrap tightly */
+    background-color: #f9f9f9;
+    text-align: center;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* optional shadow */
+    border-radius: 8px;        /* optional rounded corners */
+}
+
+.boxed-link {
+    display: inline-block;
+    max-width: 300px;
+    padding: 10px;
+    background-color: lightgrey;
+    text-decoration: black;
+    color: #333;
+    text-align: center;
+    white-space: normal;
+    border: 2px solid #333;
+    border-radius: 8px;
+    font-weight: bold;
+  }
+
+
+  .gallery {
+    display: flex;
+    justify-content: center; 
+    gap: 20px;               
+    flex-wrap: wrap;         
+    margin: 30px auto;
+  }
+  
+  .gallery-item img {
+    width: 400px;
+    height: 400px;
+    border-radius: 8px;
+    transition: transform 0.3s;
+  }
+  
+  .gallery-item img:hover {
+    transform: scale(1.05);
+  }

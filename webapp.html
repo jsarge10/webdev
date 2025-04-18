@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkers</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #eee;
+    }
+    h1 {
+      margin: 10px;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      margin: 20px auto;
+      border: 3px solid #000;
+      width: fit-content;
+    }
+    .square {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .light {
+      background-color: #f0d9b5;
+    }
+    .dark {
+      background-color: #b58863;
+    }
+    .piece {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .player {
+      background-color: red;
+    }
+    .computer {
+      background-color: black;
+    }
+    .selected {
+      outline: 3px solid yellow;
+    }
+    #resetBtn {
+      display: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Checkers: Computer vs You</h1>
+  <div id="board"></div>
+  <button id="resetBtn">Play Again</button>
+
+  <script>
+    const boardEl = document.getElementById("board");
+    const resetBtn = document.getElementById("resetBtn");
+    let board = [];
+    let selected = null;
+
+    function createPiece(type) {
+      const div = document.createElement("div");
+      div.classList.add("piece", type);
+      return div;
+    }
+
+    function initBoard() {
+      boardEl.innerHTML = "";
+      board = [];
+      resetBtn.style.display = "none";
+      selected = null;
+
+      for (let row = 0; row < 8; row++) {
+        const rowArr = [];
+        for (let col = 0; col < 8; col++) {
+          const square = document.createElement("div");
+          square.classList.add("square", (row + col) % 2 === 0 ? "light" : "dark");
+          square.dataset.row = row;
+          square.dataset.col = col;
+          boardEl.appendChild(square);
+          rowArr.push({ piece: null, el: square });
+
+          if ((row + col) % 2 === 1) {
+            if (row < 3) {
+              rowArr[col].piece = "computer";
+              square.appendChild(createPiece("computer"));
+            } else if (row > 4) {
+              rowArr[col].piece = "player";
+              square.appendChild(createPiece("player"));
+            }
+          }
+        }
+        board.push(rowArr);
+      }
+    }
+
+    function getLegalMoves(turn) {
+      const moves = [];
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if (board[r][c].piece === turn) {
+            const dir = turn === "player" ? -1 : 1;
+            [[dir, -1], [dir, 1]].forEach(([dr, dc]) => {
+              const nr = r + dr, nc = c + dc;
+              if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc].piece === null) {
+                moves.push({ from: [r, c], to: [nr, nc] });
+              }
+              const cr = r + 2 * dr, cc = c + 2 * dc;
+              if (
+                cr >= 0 && cr < 8 && cc >= 0 && cc < 8 &&
+                board[nr] && board[nr][nc] && board[cr][cc] &&
+                board[nr][nc].piece &&
+                board[nr][nc].piece !== turn &&
+                board[cr][cc].piece === null
+              ) {
+                moves.push({ from: [r, c], to: [cr, cc], capture: [nr, nc] });
+              }
+            });
+          }
+        }
+      }
+      return moves;
+    }
+
+    function movePiece(move) {
+      const [fr, fc] = move.from;
+      const [tr, tc] = move.to;
+      const piece = board[fr][fc].piece;
+
+      board[fr][fc].piece = null;
+      board[tr][tc].piece = piece;
+
+      const fromSquare = board[fr][fc].el;
+      const toSquare = board[tr][tc].el;
+
+      fromSquare.innerHTML = "";
+      toSquare.innerHTML = "";
+      toSquare.appendChild(createPiece(piece));
+
+      if (move.capture) {
+        const [cr, cc] = move.capture;
+        board[cr][cc].piece = null;
+        board[cr][cc].el.innerHTML = "";
+      }
+    }
+
+    function computerTurn() {
+      const moves = getLegalMoves("computer");
+      if (moves.length === 0) {
+        alert("You win!");
+        endGame();
+        return;
+      }
+      const move = moves[Math.floor(Math.random() * moves.length)];
+      movePiece(move);
+      setTimeout(playerTurn, 300);
+    }
+
+    function playerTurn() {
+      const moves = getLegalMoves("player");
+      if (moves.length === 0) {
+        alert("Computer wins!");
+        endGame();
+        return;
+      }
+
+      boardEl.querySelectorAll(".square").forEach(sq => {
+        sq.onclick = () => {
+          const r = +sq.dataset.row, c = +sq.dataset.col;
+          if (!selected && board[r][c].piece === "player") {
+            selected = { row: r, col: c };
+            board[r][c].el.classList.add("selected");
+          } else if (selected) {
+            const move = moves.find(m =>
+              m.from[0] === selected.row && m.from[1] === selected.col &&
+              m.to[0] === r && m.to[1] === c
+            );
+            if (move) {
+              board[selected.row][selected.col].el.classList.remove("selected");
+              selected = null;
+              movePiece(move);
+              setTimeout(computerTurn, 300);
+            } else {
+              board[selected.row][selected.col].el.classList.remove("selected");
+              selected = null;
+            }
+          }
+        };
+      });
+    }
+
+    function endGame() {
+      resetBtn.style.display = "inline-block";
+    }
+
+    resetBtn.onclick = () => {
+      initBoard();
+      setTimeout(computerTurn, 300);
+    };
+
+    initBoard();
+    setTimeout(computerTurn, 500);
+  </script>
+</body>
+</html>
